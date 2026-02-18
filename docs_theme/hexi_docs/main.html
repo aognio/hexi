@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="description" content="{{ config.site_description|default('', true) }}" />
+  {% if config.site_author %}<meta name="author" content="{{ config.site_author }}" />{% endif %}
+  <title>{% if page and page.title %}{{ page.title }} - {% endif %}{{ config.site_name }}</title>
+
+  <script src="{{ 'assets/js/theme-init.js' | url }}"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Gabarito:wght@400;500;600;700;800&family=Victor+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="{{ 'assets/css/theme.css' | url }}" />
+  {% for path in extra_css %}
+  <link rel="stylesheet" href="{{ path | url }}" />
+  {% endfor %}
+</head>
+<body>
+  <a class="skip-link" href="#content">Skip to content</a>
+  <div class="bg-orb bg-orb-a" aria-hidden="true"></div>
+  <div class="bg-orb bg-orb-b" aria-hidden="true"></div>
+
+  {% include "partials/header.html" %}
+
+  <div class="app-shell">
+    <aside class="sidebar" id="sidebar" aria-label="Primary">
+      {% include "partials/sidebar.html" %}
+    </aside>
+
+    <main id="content" class="content" tabindex="-1" role="main">
+      {% if page and page.title %}
+      <header class="page-header">
+        <h1>{{ page.title }}</h1>
+      </header>
+      {% endif %}
+
+      <article class="prose">
+        {{ page.content }}
+      </article>
+
+      <nav class="pager" aria-label="Pagination">
+        {% if page.previous_page %}
+          <a href="{{ page.previous_page.url | url }}" class="pager-link prev" rel="prev">← {{ page.previous_page.title }}</a>
+        {% endif %}
+        {% if page.next_page %}
+          <a href="{{ page.next_page.url | url }}" class="pager-link next" rel="next">{{ page.next_page.title }} →</a>
+        {% endif %}
+      </nav>
+    </main>
+
+    <aside class="toc" aria-label="Table of contents">
+      {% if page and page.toc %}
+      <div class="toc-card">
+        <p class="toc-title">On this page</p>
+        {{ page.toc }}
+      </div>
+      {% endif %}
+    </aside>
+  </div>
+
+  {% include "partials/footer.html" %}
+
+  <script src="{{ 'assets/js/theme.js' | url }}"></script>
+  {% for path in extra_javascript %}
+  <script src="{{ path | url }}"></script>
+  {% endfor %}
+</body>
+</html>

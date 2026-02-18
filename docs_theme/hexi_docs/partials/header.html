@@ -1,0 +1,13 @@
+<header class="topbar" role="banner">
+  <div class="topbar-inner">
+    <button class="menu-toggle" id="menu-toggle" aria-controls="sidebar" aria-expanded="false" aria-label="Toggle navigation">☰</button>
+    <a class="brand" href="{{ nav.homepage.url | url if nav.homepage else base_url }}">{{ config.site_name }}</a>
+
+    <form class="search" role="search" action="{{ 'search/' | url }}">
+      <label class="sr-only" for="search-input">Search docs</label>
+      <input id="search-input" name="q" type="search" placeholder="Search docs..." autocomplete="off" />
+    </form>
+
+    <button class="theme-toggle" id="theme-toggle" aria-label="Toggle light and dark mode">◐</button>
+  </div>
+</header>

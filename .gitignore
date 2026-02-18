@@ -3,3 +3,5 @@
 .pytest_cache/
 __pycache__/
 site/
+dist/
+src/hexicodes.egg-info/

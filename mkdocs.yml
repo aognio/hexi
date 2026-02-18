@@ -4,14 +4,8 @@ site_url: https://hexi.readthedocs.io
 repo_url: https://github.com/your-org/hexi
 
 theme:
-  name: material
-  features:
-    - navigation.sections
-    - navigation.top
-    - content.code.copy
-    - content.tabs.link
-    - search.suggest
-    - search.highlight
+  name: null
+  custom_dir: docs_theme/hexi_docs
 
 nav:
   - Home:
@@ -65,3 +59,6 @@ markdown_extensions:
   - md_in_html
   - toc:
       permalink: true
+
+plugins:
+  - search

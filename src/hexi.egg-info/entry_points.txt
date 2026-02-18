@@ -1,2 +1,0 @@
-[console_scripts]
-hexi = hexi.cli:app

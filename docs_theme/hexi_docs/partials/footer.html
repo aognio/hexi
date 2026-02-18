@@ -1,0 +1,14 @@
+<footer class="footer" role="contentinfo">
+  <div class="footer-inner">
+    <p>
+      {% if config.copyright %}
+        {{ config.copyright }}
+      {% else %}
+        {{ config.site_name }}
+      {% endif %}
+    </p>
+    {% if config.repo_url %}
+    <p><a href="{{ config.repo_url }}" rel="noopener" target="_blank">Source repository</a></p>
+    {% endif %}
+  </div>
+</footer>

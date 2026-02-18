@@ -1,0 +1,18 @@
+{% macro render_nav(items, level=0) -%}
+<ul class="nav-level nav-level-{{ level }}">
+  {%- for item in items %}
+  <li class="nav-item{% if item.active %} active{% endif %}">
+    <a href="{{ item.url | url }}" class="nav-link">{{ item.title }}</a>
+    {%- if item.children %}
+      {{ render_nav(item.children, level + 1) }}
+    {%- endif %}
+  </li>
+  {%- endfor %}
+</ul>
+{%- endmacro %}
+
+<nav class="site-nav" aria-label="Documentation navigation">
+  {% if nav %}
+    {{ render_nav(nav, 0) }}
+  {% endif %}
+</nav>
