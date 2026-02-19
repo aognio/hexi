@@ -14,6 +14,7 @@ The format is based on Keep a Changelog, and this project follows Semantic Versi
   - `run_tests.json`
   - `mixed_step.json`
 - End-to-end tests for `hexi apply` including runlog verification and disallowed-command failure handling.
+- Pythonic task automation with `poethepoet` (`poe`) for test/docs/build/release/publish workflows.
 
 ### Changed
 - Version bumped from `0.1.0` to `0.2.0`.

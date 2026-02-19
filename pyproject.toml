@@ -53,9 +53,12 @@ docs = [
   "mkdocs-material>=9.5,<10"
 ]
 dev = [
+  "build>=1.2,<2",
+  "poethepoet>=0.29,<1",
   "pytest>=8.2,<9",
   "pytest-asyncio>=0.23,<1",
   "requests>=2.31,<3",
+  "twine>=5.1,<6",
   "responses>=0.25,<1",
   "respx>=0.21,<1"
 ]
@@ -87,3 +90,19 @@ hexi = [
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = "-q"
+
+[tool.poe.tasks]
+test = "pytest -q"
+docs = "mkdocs serve"
+docs-build = "mkdocs build -q"
+check = ["pytest -q", "mkdocs build -q"]
+clean = "rm -rf build dist *.egg-info src/hexicodes.egg-info site"
+build = ["python -m build", "python -m twine check dist/*"]
+publish-testpypi = "python -m twine upload --repository-url https://test.pypi.org/legacy/ dist/*"
+publish-pypi = "python -m twine upload dist/*"
+release = [
+  "python -m build",
+  "python -m twine check dist/*",
+  "pytest -q",
+  "mkdocs build -q"
+]

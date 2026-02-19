@@ -87,6 +87,26 @@ Dev/test dependencies:
 pip install -e ".[dev]"
 ```
 
+## Pythonic Task Automation (`poe`)
+Hexi includes a project-local task runner using [Poe the Poet](https://poethepoet.natn.io/), so you do not need to memorize long command chains.
+
+Install dev tooling:
+```bash
+pip install -e ".[dev]"
+```
+
+Common tasks:
+```bash
+poe test            # run pytest
+poe docs            # mkdocs serve (local docs server)
+poe docs-build      # mkdocs static build
+poe check           # tests + docs build
+poe build           # package build + twine check
+poe release         # build + twine check + tests + docs build
+poe publish-testpypi  # upload dist/* to TestPyPI via repository URL
+poe publish-pypi      # upload dist/* to PyPI
+```
+
 ## CLI
 - `hexi --help` or `hexi help` : show command help
 - `hexi --version` or `hexi version` : print installed version

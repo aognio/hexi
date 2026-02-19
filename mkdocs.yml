@@ -24,6 +24,7 @@ nav:
     - Team Bootstrap: tutorials/team-bootstrap.md
   - How-To:
     - Configure Providers: how-to/configure-providers.md
+    - Automate Dev + Release: how-to/automate-dev-release.md
     - Write Safe Policies: how-to/write-policies.md
     - Troubleshoot Failing Runs: how-to/troubleshoot-runs.md
     - Add A Model Adapter: how-to/add-model-adapter.md
