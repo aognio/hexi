@@ -3,7 +3,7 @@ from __future__ import annotations
 from .domain import Event, StepResult, Thread
 from .ports import EventSinkPort, ExecPort, MemoryPort, ModelPort, WorkspacePort
 from .policy import command_allowed
-from .schemas import parse_action_plan
+from .schemas import ActionPlan, parse_action_plan
 
 SYSTEM_PROMPT = """You are Hexi. Return only JSON matching this contract:
 {
@@ -27,7 +27,7 @@ Rules:
 class RunStepService:
     def __init__(
         self,
-        model: ModelPort,
+        model: ModelPort | None,
         workspace: WorkspacePort,
         executor: ExecPort,
         events: EventSinkPort,
@@ -44,44 +44,17 @@ class RunStepService:
         self.memory.append_runlog(event)
         acc.append(event)
 
-    def run_once(self, task: str) -> StepResult:
-        self.memory.ensure_initialized()
-        model_config = self.memory.load_model_config()
+    def _run_plan_internal(self, task: str, thread_id: str, plan: ActionPlan, source: str) -> StepResult:
         policy = self.memory.load_policy()
-        thread = Thread(id="single-step", task=task)
         out_events: list[Event] = []
 
         initial = Event(
             type="progress",
             one_line_summary="Starting single-step run",
             blocking=False,
-            payload={"task": task, "thread_id": thread.id},
+            payload={"task": task, "thread_id": thread_id, "source": source},
         )
         self._emit(initial, out_events)
-
-        status = self.workspace.git_status()
-        diff = self.workspace.git_diff(policy.max_diff_chars)
-        user_prompt = (
-            f"Task:\n{task}\n\n"
-            f"Repo status:\n{status}\n\n"
-            f"Current diff (truncated):\n{diff}\n"
-        )
-
-        try:
-            raw_plan = self.model.plan_step(model_config, SYSTEM_PROMPT, user_prompt)
-            plan = parse_action_plan(raw_plan)
-        except Exception as exc:
-            ev = Event(
-                type="error",
-                one_line_summary="Model output parsing failed",
-                blocking=True,
-                payload={"error": str(exc)},
-            )
-            self._emit(ev, out_events)
-            done = Event(type="done", one_line_summary="Run failed", blocking=True, payload={"success": False})
-            self._emit(done, out_events)
-            return StepResult(success=False, events=out_events)
-
         self._emit(
             Event(
                 type="progress",
@@ -179,3 +152,47 @@ class RunStepService:
             out_events,
         )
         return StepResult(success=success, events=out_events)
+
+    def run_plan(self, task: str, plan: ActionPlan, source: str = "manual") -> StepResult:
+        self.memory.ensure_initialized()
+        thread = Thread(id="single-step", task=task)
+        return self._run_plan_internal(task=task, thread_id=thread.id, plan=plan, source=source)
+
+    def run_once(self, task: str) -> StepResult:
+        self.memory.ensure_initialized()
+        model_config = self.memory.load_model_config()
+        thread = Thread(id="single-step", task=task)
+        policy = self.memory.load_policy()
+        status = self.workspace.git_status()
+        diff = self.workspace.git_diff(policy.max_diff_chars)
+        user_prompt = (
+            f"Task:\n{task}\n\n"
+            f"Repo status:\n{status}\n\n"
+            f"Current diff (truncated):\n{diff}\n"
+        )
+
+        try:
+            if self.model is None:
+                raise RuntimeError("model adapter is required for run_once")
+            raw_plan = self.model.plan_step(model_config, SYSTEM_PROMPT, user_prompt)
+            plan = parse_action_plan(raw_plan)
+        except Exception as exc:
+            out_events: list[Event] = []
+            initial = Event(
+                type="progress",
+                one_line_summary="Starting single-step run",
+                blocking=False,
+                payload={"task": task, "thread_id": thread.id, "source": "model"},
+            )
+            self._emit(initial, out_events)
+            ev = Event(
+                type="error",
+                one_line_summary="Model output parsing failed",
+                blocking=True,
+                payload={"error": str(exc)},
+            )
+            self._emit(ev, out_events)
+            done = Event(type="done", one_line_summary="Run failed", blocking=True, payload={"success": False})
+            self._emit(done, out_events)
+            return StepResult(success=False, events=out_events)
+        return self._run_plan_internal(task=task, thread_id=thread.id, plan=plan, source="model")

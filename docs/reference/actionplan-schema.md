@@ -35,3 +35,15 @@ Canonical JSON schema is stored at:
   ]
 }
 ```
+
+## Ready-to-run examples
+
+- `examples/action_plans/read_only.json`
+- `examples/action_plans/write_file.json`
+- `examples/action_plans/run_tests.json`
+- `examples/action_plans/mixed_step.json`
+
+```bash
+hexi plan-check --file examples/action_plans/mixed_step.json
+hexi apply --plan examples/action_plans/mixed_step.json --task "ActionPlan debug run"
+```

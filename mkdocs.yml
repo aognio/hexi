@@ -1,7 +1,7 @@
 site_name: Hexi
 site_description: Hexi minimal contract-driven coding-agent runtime
 site_url: https://hexi.readthedocs.io
-repo_url: https://github.com/your-org/hexi
+repo_url: https://github.com/hexi-codes/hexi
 
 theme:
   name: null

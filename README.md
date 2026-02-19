@@ -1,4 +1,4 @@
-# Hexi v0.1.0
+# Hexi v0.2.0
 
 ![Hexi Saturn Hexagon](https://raw.githubusercontent.com/aognio/hexi/main/assets/images/hexi-saturn-hexagon-1024x1024.png)
 
@@ -59,7 +59,7 @@ Re-run onboarding to update `.hexi/local.toml`.
 
 ## What it is not
 - No daemon, no background workers, no web UI
-- No MCP server and no SQLite in v0.1.0
+- No MCP server and no SQLite in v0.2.0
 - No multi-agent orchestration
 
 
@@ -95,6 +95,7 @@ pip install -e ".[dev]"
 - `hexi new` : scaffold a project from built-in Hexi templates (non-interactive by default)
 - `hexi demo` : fancy interactive flow with random/model-generated ideas and template scaffolding
 - `hexi run "<task>"` : execute one agent step and emit structured events
+- `hexi apply --plan plan.json` : execute a validated ActionPlan file directly (debug/replay mode)
 - `hexi diff` : show current git diff
 - `hexi doctor` : verbose diagnostics; use `--probe-model` for live “What model are you?” check
 - `hexi plan-check --file plan.json` : validate/troubleshoot ActionPlan JSON directly
@@ -173,6 +174,18 @@ openrouter_api_key = "..."
 - `examples/todo_refiner` : minimal CLI-wrapper agent integration
 - `examples/embedded_step` : direct embedded `RunStepService` usage
 - `examples/policy_loop` : multi-step user-gated loop using repeated `hexi run`
+
+## Example ActionPlans (`hexi apply`)
+- `examples/action_plans/read_only.json` : inspect file + emit progress
+- `examples/action_plans/write_file.json` : create a file in-repo
+- `examples/action_plans/run_tests.json` : run `pytest -q`
+- `examples/action_plans/mixed_step.json` : read + write + run + emit
+
+Try one now:
+```bash
+hexi plan-check --file examples/action_plans/mixed_step.json
+hexi apply --plan examples/action_plans/mixed_step.json --task "ActionPlan debug run"
+```
 
 ## Included Hexi-native templates
 - `templates/hexi-python-lib` : tested library starter with Hexi wiring

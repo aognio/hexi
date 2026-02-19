@@ -1,0 +1,19 @@
+{
+  "summary": "Create a temporary note file in-repo",
+  "actions": [
+    {
+      "kind": "write",
+      "path": "tmp/hexi-note.txt",
+      "content": "Hexi apply example: write action executed.\n"
+    },
+    {
+      "kind": "emit",
+      "event_type": "artifact",
+      "message": "Created tmp/hexi-note.txt",
+      "blocking": false,
+      "payload": {
+        "path": "tmp/hexi-note.txt"
+      }
+    }
+  ]
+}

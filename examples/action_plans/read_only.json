@@ -1,0 +1,18 @@
+{
+  "summary": "Inspect README and emit a progress note",
+  "actions": [
+    {
+      "kind": "read",
+      "path": "README.md"
+    },
+    {
+      "kind": "emit",
+      "event_type": "progress",
+      "message": "Read-only inspection complete",
+      "blocking": false,
+      "payload": {
+        "next": "Decide what to edit"
+      }
+    }
+  ]
+}

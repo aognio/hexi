@@ -5,8 +5,8 @@ from pathlib import Path
 import pytest
 from typer.testing import CliRunner
 
-from hexi.cli import app
-from hexi.core.domain import ModelConfig
+from hexi.cli import _copy_template, app
+from hexi.core.domain import ModelConfig, StepResult
 
 runner = CliRunner()
 
@@ -134,3 +134,56 @@ def test_cli_plan_check_invalid_inline_json() -> None:
     result = runner.invoke(app, ["plan-check", "--json", '{"summary":"x","actions":[] }'])
     assert result.exit_code == 1
     assert "Plan Check Failed" in result.stdout
+
+
+def test_copy_template_uses_packaged_resources_when_local_roots_missing(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    monkeypatch.setattr("hexi.cli._local_template_roots", lambda: [])
+    destination = tmp_path / "out"
+    _copy_template("hexi-python-lib", destination, force=False)
+    assert (destination / "pyproject.toml").exists()
+    assert (destination / ".hexi" / "config.toml").exists()
+
+
+def test_cli_apply_executes_valid_plan(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+    ws = FakeWS(tmp_path)
+    mem = FakeMemory(tmp_path)
+    monkeypatch.setattr("hexi.cli._workspace_and_memory", lambda: (ws, mem))
+
+    captured: dict[str, object] = {}
+
+    class FakeApplyService:
+        def __init__(self, model, workspace, executor, events, memory) -> None:  # type: ignore[no-untyped-def]
+            captured["workspace"] = workspace
+            captured["memory"] = memory
+
+        def run_plan(self, task: str, plan, source: str) -> StepResult:  # type: ignore[no-untyped-def]
+            captured["task"] = task
+            captured["summary"] = plan.summary
+            captured["actions"] = len(plan.actions)
+            captured["source"] = source
+            return StepResult(success=True, events=[])
+
+    monkeypatch.setattr("hexi.cli.RunStepService", FakeApplyService)
+
+    plan_file = tmp_path / "plan.json"
+    plan_file.write_text(
+        '{"summary":"manual","actions":[{"kind":"emit","event_type":"progress","message":"ok","blocking":false,"payload":{}}]}',
+        encoding="utf-8",
+    )
+
+    result = runner.invoke(app, ["apply", "--plan", str(plan_file), "--task", "debug apply"])
+    assert result.exit_code == 0
+    assert captured["task"] == "debug apply"
+    assert captured["summary"] == "manual"
+    assert captured["actions"] == 1
+    assert str(captured["source"]) == str(plan_file)
+
+
+def test_cli_apply_fails_on_invalid_plan(tmp_path: Path) -> None:
+    bad_file = tmp_path / "bad.json"
+    bad_file.write_text("{not json", encoding="utf-8")
+    result = runner.invoke(app, ["apply", "--plan", str(bad_file)])
+    assert result.exit_code == 1
+    assert "Apply Failed" in result.stdout

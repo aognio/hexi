@@ -4,6 +4,7 @@ import json
 import random
 import shutil
 import subprocess
+from importlib.resources import as_file, files
 from pathlib import Path
 from typing import Any
 
@@ -27,7 +28,7 @@ from hexi.core.schemas import ActionPlanError, parse_action_plan
 from hexi.core.service import RunStepService
 
 app = typer.Typer(
-    help="Hexi CLI (v0.1.0): single-step coding-agent runtime.",
+    help="Hexi CLI (v0.2.0): single-step coding-agent runtime.",
     no_args_is_help=True,
 )
 console = Console()
@@ -116,21 +117,7 @@ def _error_and_exit(message: str, code: int = 2) -> None:
     raise typer.Exit(code=code)
 
 
-def _templates_root() -> Path:
-    candidate = Path(__file__).resolve().parents[2] / "templates"
-    if candidate.exists():
-        return candidate
-    fallback = Path.cwd() / "templates"
-    if fallback.exists():
-        return fallback
-    raise FileNotFoundError("templates directory not found")
-
-
-def _copy_template(template: str, destination: Path, force: bool) -> None:
-    src = _templates_root() / template
-    if not src.exists():
-        raise FileNotFoundError(f"template not found: {template}")
-
+def _copy_template_tree(src: Path, destination: Path, force: bool) -> None:
     destination.mkdir(parents=True, exist_ok=True)
     if any(destination.iterdir()) and not force:
         raise RuntimeError(f"destination is not empty: {destination}. Use --force to overwrite-compatible copy")
@@ -143,6 +130,29 @@ def _copy_template(template: str, destination: Path, force: bool) -> None:
             if target.exists() and not force:
                 raise RuntimeError(f"file exists: {target}. Re-run with --force")
             shutil.copy2(item, target)
+
+
+def _local_template_roots() -> list[Path]:
+    return [
+        Path(__file__).resolve().parents[2] / "templates",
+        Path.cwd() / "templates",
+    ]
+
+
+def _copy_template(template: str, destination: Path, force: bool) -> None:
+    for root in _local_template_roots():
+        src = root / template
+        if src.exists():
+            _copy_template_tree(src, destination, force)
+            return
+
+    package_templates = files("hexi").joinpath("templates").joinpath(template)
+    if package_templates.is_dir():
+        with as_file(package_templates) as src:
+            _copy_template_tree(Path(src), destination, force)
+            return
+
+    raise FileNotFoundError(f"template not found: {template}")
 
 
 def _validate_destination(destination: Path, force: bool) -> None:
@@ -323,6 +333,51 @@ def plan_check_cmd(
             notes = f"event={action.event_type}, blocking={action.blocking}"
         actions_table.add_row(str(idx), action.kind, target, notes)
     console.print(actions_table)
+
+
+@app.command("apply", help="Execute a validated ActionPlan JSON file directly (debug/replay mode).")
+def apply_cmd(
+    plan: Path = typer.Option(..., "--plan", help="Path to ActionPlan JSON file."),
+    task: str = typer.Option("Apply prebuilt action plan", "--task", help="Task label used in run events."),
+) -> None:
+    """Execute one ActionPlan file without calling the model."""
+    if not plan.exists():
+        _error_and_exit(f"ActionPlan file not found: {plan}")
+    raw = plan.read_text(encoding="utf-8")
+    try:
+        parsed = parse_action_plan(raw)
+    except ActionPlanError as exc:
+        console.print(
+            Panel(
+                f"Invalid ActionPlan from [bold]{plan}[/bold]\n\n{exc}",
+                title="Apply Failed",
+                border_style="red",
+            )
+        )
+        raise typer.Exit(code=1)
+
+    try:
+        ws, memory = _workspace_and_memory()
+    except RuntimeError as exc:
+        _error_and_exit(str(exc))
+
+    memory.ensure_initialized()
+    info = Table(show_header=False)
+    info.add_row("Plan file", str(plan))
+    info.add_row("Summary", parsed.summary)
+    info.add_row("Actions", str(len(parsed.actions)))
+    info.add_row("Task label", task)
+    console.print(Panel(info, title="Hexi Apply", border_style="blue"))
+
+    service = RunStepService(
+        model=None,
+        workspace=ws,
+        executor=LocalExec(),
+        events=ConsoleEventSink(),
+        memory=memory,
+    )
+    result = service.run_plan(task=task, plan=parsed, source=str(plan))
+    raise typer.Exit(code=0 if result.success else 1)
 
 
 @app.command("init", help="Initialize .hexi config/runlog files in this folder (or git root when available).")

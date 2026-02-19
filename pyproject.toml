@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "hexicodes"
-version = "0.1.0"
+version = "0.2.0"
 description = "Minimal contract-driven coding-agent runtime + CLI"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -63,8 +63,8 @@ dev = [
 [project.urls]
 Homepage = "https://hexi.readthedocs.io"
 Documentation = "https://hexi.readthedocs.io"
-Source = "https://github.com/antonioognio/hexi"
-Issues = "https://github.com/antonioognio/hexi/issues"
+Source = "https://github.com/hexi-codes/hexi"
+Issues = "https://github.com/hexi-codes/hexi/issues"
 
 [project.scripts]
 hexi = "hexi.cli:app"
@@ -72,9 +72,17 @@ hexi = "hexi.cli:app"
 [tool.setuptools]
 package-dir = {"" = "src"}
 license-files = ["LICENSE"]
+include-package-data = true
 
 [tool.setuptools.packages.find]
 where = ["src"]
+
+[tool.setuptools.package-data]
+hexi = [
+  "templates/**",
+  "templates/**/.gitignore",
+  "templates/**/.hexi/*.toml"
+]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

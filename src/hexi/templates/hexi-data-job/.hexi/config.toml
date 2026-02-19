@@ -1,0 +1,11 @@
+[model]
+provider = "openai_compat"
+model = "gpt-4o-mini"
+
+[providers.openai_compat]
+base_url = "https://api.openai.com/v1"
+
+[policy]
+allow_commands = ["git status", "git diff", "python -m pytest", "pytest", "python -m datajob.main --dry-run"]
+max_diff_chars = 4000
+max_file_read_chars = 4000

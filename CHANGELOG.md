@@ -4,6 +4,22 @@ All notable changes to this project will be documented in this file.
 
 The format is based on Keep a Changelog, and this project follows Semantic Versioning.
 
+## [0.2.0] - 2026-02-19
+
+### Added
+- New `hexi apply --plan <file>` command to execute validated ActionPlan JSON directly (debug/replay mode).
+- Example ActionPlans under `examples/action_plans/`:
+  - `read_only.json`
+  - `write_file.json`
+  - `run_tests.json`
+  - `mixed_step.json`
+- End-to-end tests for `hexi apply` including runlog verification and disallowed-command failure handling.
+
+### Changed
+- Version bumped from `0.1.0` to `0.2.0`.
+- Template loading now supports installed-package resources (works from wheel installs, not only source checkouts).
+- Project/repo URL references aligned to `https://github.com/hexi-codes/hexi`.
+
 ## [0.1.0] - 2026-02-18
 
 ### Added
@@ -44,4 +60,5 @@ The format is based on Keep a Changelog, and this project follows Semantic Versi
 - Reduced false failures in idea parsing with tolerant JSON extraction from model output.
 - Resolved dependency compatibility issue by allowing `rich>=13.7,<15`.
 
-[0.1.0]: https://github.com/antonioognio/hexi/releases/tag/v0.1.0
+[0.2.0]: https://github.com/hexi-codes/hexi/releases/tag/v0.2.0
+[0.1.0]: https://github.com/hexi-codes/hexi/releases/tag/v0.1.0

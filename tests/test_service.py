@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 
 from hexi.core.domain import Event, ModelConfig, Policy
+from hexi.core.schemas import parse_action_plan
 from hexi.core.service import RunStepService
 
 
@@ -154,3 +155,28 @@ def test_service_nonzero_command_exit_marks_run_unsuccessful() -> None:
     run_event = next(e for e in events.emitted if e.one_line_summary.startswith("Ran command:"))
     assert run_event.blocking is True
     assert run_event.payload["exit_code"] == 2
+
+
+def test_service_run_plan_executes_without_model() -> None:
+    plan_json = {
+        "summary": "manual apply",
+        "actions": [
+            {"kind": "write", "path": "manual.txt", "content": "ok"},
+            {"kind": "emit", "event_type": "progress", "message": "applied", "blocking": False, "payload": {}},
+        ],
+    }
+    memory = FakeMemory()
+    events = FakeEvents()
+    workspace = FakeWorkspace()
+    executor = FakeExec(rc=0)
+    parsed = parse_action_plan(json.dumps(plan_json))
+
+    result = RunStepService(None, workspace, executor, events, memory).run_plan(
+        task="apply task",
+        plan=parsed,
+        source="tests",
+    )
+
+    assert result.success is True
+    assert workspace.files["manual.txt"] == "ok"
+    assert events.emitted[-1].type == "done"

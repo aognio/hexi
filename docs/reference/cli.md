@@ -56,6 +56,16 @@ Exit codes:
 - `1`: run completed with failure state
 - `2`: environment/setup error
 
+## `hexi apply --plan plan.json`
+
+Executes one validated ActionPlan JSON file directly.
+
+Use this for:
+
+- debugging parser/executor behavior
+- replaying a saved plan without model calls
+- deterministic policy and workspace troubleshooting
+
 ## `hexi diff`
 
 Prints bounded git diff.

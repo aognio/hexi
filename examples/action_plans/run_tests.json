@@ -1,0 +1,18 @@
+{
+  "summary": "Run tests via allowlisted command",
+  "actions": [
+    {
+      "kind": "run",
+      "command": "pytest -q"
+    },
+    {
+      "kind": "emit",
+      "event_type": "review",
+      "message": "Test command finished",
+      "blocking": false,
+      "payload": {
+        "command": "pytest -q"
+      }
+    }
+  ]
+}
