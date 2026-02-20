@@ -13,6 +13,8 @@ Canonical JSON schema is stored at:
 
 - `read`
 - `write`
+- `list` (`path`/`glob`/`limit` optional)
+- `search` (`query` required; `path`/`glob`/`limit` optional)
 - `run`
 - `emit`
 
@@ -30,6 +32,8 @@ Canonical JSON schema is stored at:
   "summary": "add one test",
   "actions": [
     {"kind": "read", "path": "tests/test_parser.py"},
+    {"kind": "list", "path": "src", "glob": "**/*.py", "limit": 100},
+    {"kind": "search", "query": "RunStepService", "path": "src", "glob": "**/*.py", "limit": 20},
     {"kind": "write", "path": "tests/test_parser.py", "content": "..."},
     {"kind": "run", "command": "pytest tests/test_parser.py"}
   ]
@@ -42,6 +46,8 @@ Canonical JSON schema is stored at:
 - `examples/action_plans/write_file.json`
 - `examples/action_plans/run_tests.json`
 - `examples/action_plans/mixed_step.json`
+- `examples/action_plans/list_files.json`
+- `examples/action_plans/search_text.json`
 
 ```bash
 hexi plan-check --file examples/action_plans/mixed_step.json

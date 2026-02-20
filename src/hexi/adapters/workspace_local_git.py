@@ -51,6 +51,62 @@ class LocalGitWorkspace:
         p.parent.mkdir(parents=True, exist_ok=True)
         p.write_text(content, encoding="utf-8")
 
+    def list_files(self, path: str | None, glob_pattern: str | None, limit: int) -> list[str]:
+        if limit < 1:
+            raise ValueError("limit must be >= 1")
+        base = resolve_repo_path(self._repo_root, path or ".")
+        pattern = glob_pattern or "**/*"
+        found: list[str] = []
+
+        candidates: list[Path]
+        if base.is_file():
+            candidates = [base]
+        else:
+            candidates = list(base.glob(pattern))
+
+        for p in sorted(candidates):
+            if not p.is_file():
+                continue
+            rel = p.resolve().relative_to(self._repo_root).as_posix()
+            found.append(rel)
+            if len(found) >= limit:
+                break
+        return found
+
+    def search_text(
+        self,
+        query: str,
+        path: str | None,
+        glob_pattern: str | None,
+        limit: int,
+        max_chars: int,
+    ) -> list[dict[str, object]]:
+        if not query:
+            raise ValueError("query must be non-empty")
+        if limit < 1:
+            raise ValueError("limit must be >= 1")
+
+        files = self.list_files(path=path, glob_pattern=glob_pattern, limit=1000)
+        out: list[dict[str, object]] = []
+        for rel in files:
+            p = resolve_repo_path(self._repo_root, rel)
+            try:
+                text = p.read_text(encoding="utf-8")
+            except UnicodeDecodeError:
+                continue
+            for idx, line in enumerate(text.splitlines(), start=1):
+                if query in line:
+                    out.append(
+                        {
+                            "path": rel,
+                            "line": idx,
+                            "text": line[:max_chars],
+                        }
+                    )
+                    if len(out) >= limit:
+                        return out
+        return out
+
     def git_status(self) -> str:
         proc = subprocess.run(
             ["git", "status", "--short"],

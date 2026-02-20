@@ -1,5 +1,4 @@
-.hexi/local.toml
-.hexi/runlog.jsonl
+.hexi/
 .pytest_cache/
 __pycache__/
 site/

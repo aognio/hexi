@@ -45,6 +45,26 @@ class FakeWorkspace:
     def write_text(self, path: str, content: str) -> None:
         self.files[path] = content
 
+    def list_files(self, path: str | None, glob_pattern: str | None, limit: int) -> list[str]:
+        return sorted(list(self.files.keys()))[:limit]
+
+    def search_text(
+        self,
+        query: str,
+        path: str | None,
+        glob_pattern: str | None,
+        limit: int,
+        max_chars: int,
+    ) -> list[dict[str, object]]:
+        out: list[dict[str, object]] = []
+        for name, content in self.files.items():
+            for idx, line in enumerate(content.splitlines(), start=1):
+                if query in line:
+                    out.append({"path": name, "line": idx, "text": line[:max_chars]})
+                    if len(out) >= limit:
+                        return out
+        return out
+
     def git_status(self) -> str:
         return " M a.txt"
 
@@ -180,3 +200,25 @@ def test_service_run_plan_executes_without_model() -> None:
     assert result.success is True
     assert workspace.files["manual.txt"] == "ok"
     assert events.emitted[-1].type == "done"
+
+
+def test_service_executes_list_and_search_actions() -> None:
+    plan = {
+        "summary": "discover files",
+        "actions": [
+            {"kind": "list", "path": ".", "glob": "**/*.txt", "limit": 10},
+            {"kind": "search", "query": "alpha", "path": ".", "glob": "**/*.txt", "limit": 10},
+        ],
+    }
+    memory = FakeMemory()
+    events = FakeEvents()
+    workspace = FakeWorkspace()
+    executor = FakeExec(rc=0)
+    model = StaticModel(json.dumps(plan))
+
+    result = RunStepService(model, workspace, executor, events, memory).run_once("do work")
+
+    assert result.success is True
+    summaries = [e.one_line_summary for e in events.emitted if e.type == "artifact"]
+    assert any(s.startswith("Listed files") for s in summaries)
+    assert any(s.startswith("Searched 'alpha'") for s in summaries)

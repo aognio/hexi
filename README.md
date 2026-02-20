@@ -1,4 +1,4 @@
-# Hexi v0.2.1
+# Hexi v0.3.0
 
 ![Hexi Saturn Hexagon](https://raw.githubusercontent.com/aognio/hexi/main/assets/images/hexi-saturn-hexagon-1024x1024.png)
 
@@ -59,7 +59,7 @@ Re-run onboarding to update `.hexi/local.toml`.
 
 ## What it is not
 - No daemon, no background workers, no web UI
-- No MCP server and no SQLite in v0.2.1
+- No MCP server and no SQLite in v0.3.0
 - No multi-agent orchestration
 
 
@@ -109,6 +109,7 @@ poe publish-pypi      # upload dist/* to PyPI
 
 ## CLI
 - `hexi --help` or `hexi help` : show command help
+- `hexi -v ...` / `hexi -vv ...` : increase runtime verbosity (trace lines + richer event payloads)
 - `hexi --version` or `hexi version` : print installed version
 - `hexi init` : create `.hexi/config.toml`, `.hexi/local.toml`, `.hexi/runlog.jsonl`
 - `hexi onboard` : interactive setup for provider/model and optional local key paste
@@ -204,6 +205,8 @@ openrouter_api_key = "..."
 - `examples/action_plans/write_file.json` : create a file in-repo
 - `examples/action_plans/run_tests.json` : run `pytest -q`
 - `examples/action_plans/mixed_step.json` : read + write + run + emit
+- `examples/action_plans/list_files.json` : list files by path/glob
+- `examples/action_plans/search_text.json` : search text matches by path/glob
 
 Try one now:
 ```bash

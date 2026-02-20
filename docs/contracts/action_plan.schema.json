@@ -14,10 +14,13 @@
         "additionalProperties": false,
         "required": ["kind"],
         "properties": {
-          "kind": { "type": "string", "enum": ["read", "write", "run", "emit"] },
+          "kind": { "type": "string", "enum": ["read", "write", "run", "emit", "list", "search"] },
           "path": { "type": "string" },
           "content": { "type": "string" },
           "command": { "type": "string" },
+          "query": { "type": "string" },
+          "glob": { "type": "string" },
+          "limit": { "type": "integer", "minimum": 1, "maximum": 500 },
           "event_type": {
             "type": "string",
             "enum": ["progress", "question", "review", "artifact", "error", "done"]
@@ -38,6 +41,10 @@
           {
             "if": { "properties": { "kind": { "const": "run" } } },
             "then": { "required": ["command"] }
+          },
+          {
+            "if": { "properties": { "kind": { "const": "search" } } },
+            "then": { "required": ["query"] }
           },
           {
             "if": { "properties": { "kind": { "const": "emit" } } },

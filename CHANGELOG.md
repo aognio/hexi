@@ -4,6 +4,24 @@ All notable changes to this project will be documented in this file.
 
 The format is based on Keep a Changelog, and this project follows Semantic Versioning.
 
+## [0.3.0] - 2026-02-20
+
+### Added
+- New ActionPlan action kinds:
+  - `list` for file discovery (`path`/`glob`/`limit`)
+  - `search` for text discovery (`query` required, optional `path`/`glob`/`limit`)
+- Workspace adapter support for safe repo-scoped file listing and text search.
+- Verbosity levels for CLI output:
+  - `-v` for trace lines + richer event payload output
+  - `-vv` for maximal payload output
+- Runnable ActionPlan examples:
+  - `examples/action_plans/list_files.json`
+  - `examples/action_plans/search_text.json`
+
+### Changed
+- Version bumped from `0.2.1` to `0.3.0`.
+- Canonical ActionPlan JSON schema/docs updated to include `list` and `search`.
+
 ## [0.2.1] - 2026-02-20
 
 ### Added
@@ -72,6 +90,7 @@ The format is based on Keep a Changelog, and this project follows Semantic Versi
 - Reduced false failures in idea parsing with tolerant JSON extraction from model output.
 - Resolved dependency compatibility issue by allowing `rich>=13.7,<15`.
 
+[0.3.0]: https://github.com/hexi-codes/hexi/releases/tag/v0.3.0
 [0.2.1]: https://github.com/hexi-codes/hexi/releases/tag/v0.2.1
 [0.2.0]: https://github.com/hexi-codes/hexi/releases/tag/v0.2.0
 [0.1.0]: https://github.com/hexi-codes/hexi/releases/tag/v0.1.0

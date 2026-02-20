@@ -11,6 +11,8 @@ SYSTEM_PROMPT = """You are Hexi. Return only JSON matching this contract:
   \"actions\": [
     {\"kind\":\"read\",\"path\":\"...\"} |
     {\"kind\":\"write\",\"path\":\"...\",\"content\":\"...\"} |
+    {\"kind\":\"list\",\"path\":\".\",\"glob\":\"**/*.py\",\"limit\":200} |
+    {\"kind\":\"search\",\"query\":\"RunStepService\",\"path\":\"src\",\"glob\":\"**/*.py\",\"limit\":50} |
     {\"kind\":\"run\",\"command\":\"...\"} |
     {\"kind\":\"emit\",\"event_type\":\"progress|question|review|artifact|error|done\",\"message\":\"...\",\"blocking\":false,\"payload\":{}}
   ]
@@ -109,6 +111,48 @@ class RunStepService:
                     )
                     if code != 0:
                         success = False
+                elif action.kind == "list":
+                    files = self.workspace.list_files(
+                        path=action.path,
+                        glob_pattern=action.glob,
+                        limit=action.limit or 200,
+                    )
+                    self._emit(
+                        Event(
+                            type="artifact",
+                            one_line_summary=f"Listed files ({len(files)})",
+                            blocking=False,
+                            payload={
+                                "path": action.path or ".",
+                                "glob": action.glob or "**/*",
+                                "files": files,
+                            },
+                        ),
+                        out_events,
+                    )
+                elif action.kind == "search":
+                    assert action.query is not None
+                    matches = self.workspace.search_text(
+                        query=action.query,
+                        path=action.path,
+                        glob_pattern=action.glob,
+                        limit=action.limit or 50,
+                        max_chars=policy.max_file_read_chars,
+                    )
+                    self._emit(
+                        Event(
+                            type="artifact",
+                            one_line_summary=f"Searched '{action.query}' ({len(matches)} matches)",
+                            blocking=False,
+                            payload={
+                                "query": action.query,
+                                "path": action.path or ".",
+                                "glob": action.glob or "**/*",
+                                "matches": matches,
+                            },
+                        ),
+                        out_events,
+                    )
                 else:
                     self._emit(
                         Event(

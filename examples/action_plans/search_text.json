@@ -1,0 +1,21 @@
+{
+  "summary": "Search for RunStepService references in source files",
+  "actions": [
+    {
+      "kind": "search",
+      "query": "RunStepService",
+      "path": "src",
+      "glob": "**/*.py",
+      "limit": 25
+    },
+    {
+      "kind": "emit",
+      "event_type": "artifact",
+      "message": "Search results collected",
+      "blocking": false,
+      "payload": {
+        "query": "RunStepService"
+      }
+    }
+  ]
+}

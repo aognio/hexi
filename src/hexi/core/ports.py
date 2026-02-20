@@ -21,6 +21,19 @@ class WorkspacePort(Protocol):
     def write_text(self, path: str, content: str) -> None:
         ...
 
+    def list_files(self, path: str | None, glob_pattern: str | None, limit: int) -> list[str]:
+        ...
+
+    def search_text(
+        self,
+        query: str,
+        path: str | None,
+        glob_pattern: str | None,
+        limit: int,
+        max_chars: int,
+    ) -> list[dict[str, object]]:
+        ...
+
     def git_status(self) -> str:
         ...
 

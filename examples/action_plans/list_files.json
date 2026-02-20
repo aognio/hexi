@@ -1,0 +1,20 @@
+{
+  "summary": "List Python files under src for code discovery",
+  "actions": [
+    {
+      "kind": "list",
+      "path": "src",
+      "glob": "**/*.py",
+      "limit": 50
+    },
+    {
+      "kind": "emit",
+      "event_type": "progress",
+      "message": "Listed source files",
+      "blocking": false,
+      "payload": {
+        "scope": "src/**/*.py"
+      }
+    }
+  ]
+}

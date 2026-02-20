@@ -4,6 +4,11 @@
 
 Shows command help. Hexi also displays help when run without arguments.
 
+Use global verbosity flags on any command:
+
+- `-v`: include trace lines and richer payload output
+- `-vv`: include maximal payload output
+
 ## `hexi --version` / `hexi version`
 
 Prints the installed Hexi version.

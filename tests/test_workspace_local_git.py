@@ -40,3 +40,28 @@ def test_workspace_git_status_and_diff(tmp_path: Path) -> None:
 def test_workspace_requires_git_repo(tmp_path: Path) -> None:
     with pytest.raises(RuntimeError):
         LocalGitWorkspace(tmp_path)
+
+
+def test_workspace_list_files_and_search_text(tmp_path: Path) -> None:
+    _init_repo(tmp_path)
+    ws = LocalGitWorkspace(tmp_path)
+
+    ws.write_text("src/a.py", "def run():\n    return 'ok'\n")
+    ws.write_text("src/b.py", "from hexi.core.service import RunStepService\n")
+    ws.write_text("notes.txt", "RunStepService appears here too\n")
+
+    files = ws.list_files(path="src", glob_pattern="**/*.py", limit=10)
+    assert "src/a.py" in files
+    assert "src/b.py" in files
+    assert "notes.txt" not in files
+
+    matches = ws.search_text(
+        query="RunStepService",
+        path=".",
+        glob_pattern="**/*",
+        limit=10,
+        max_chars=200,
+    )
+    paths = {str(m["path"]) for m in matches}
+    assert "src/b.py" in paths
+    assert "notes.txt" in paths

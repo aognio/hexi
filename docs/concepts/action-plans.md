@@ -9,6 +9,8 @@ Hexi requires model output in a strict JSON action-plan format.
   "summary": "one sentence",
   "actions": [
     {"kind": "read", "path": "..."},
+    {"kind": "list", "path": "src", "glob": "**/*.py", "limit": 100},
+    {"kind": "search", "query": "RunStepService", "path": "src", "glob": "**/*.py", "limit": 20},
     {"kind": "write", "path": "...", "content": "..."},
     {"kind": "run", "command": "..."},
     {"kind": "emit", "event_type": "progress", "message": "...", "blocking": false, "payload": {}}

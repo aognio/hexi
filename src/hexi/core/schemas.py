@@ -6,7 +6,7 @@ from typing import Any, Literal
 
 from .domain import Event
 
-ActionKind = Literal["read", "write", "run", "emit"]
+ActionKind = Literal["read", "write", "run", "emit", "list", "search"]
 
 
 class ActionPlanError(ValueError):
@@ -19,6 +19,9 @@ class Action:
     path: str | None = None
     content: str | None = None
     command: str | None = None
+    query: str | None = None
+    glob: str | None = None
+    limit: int | None = None
     event_type: str | None = None
     message: str | None = None
     blocking: bool | None = None
@@ -68,6 +71,9 @@ def parse_action_plan(raw: str) -> ActionPlan:
         "path",
         "content",
         "command",
+        "query",
+        "glob",
+        "limit",
         "event_type",
         "message",
         "blocking",
@@ -82,7 +88,7 @@ def parse_action_plan(raw: str) -> ActionPlan:
         if extra:
             raise ActionPlanError(f"actions[{idx}] unexpected keys: {sorted(extra)}")
         kind = item.get("kind")
-        if kind not in {"read", "write", "run", "emit"}:
+        if kind not in {"read", "write", "run", "emit", "list", "search"}:
             raise ActionPlanError(f"actions[{idx}] invalid kind")
 
         action = Action(
@@ -90,6 +96,9 @@ def parse_action_plan(raw: str) -> ActionPlan:
             path=item.get("path"),
             content=item.get("content"),
             command=item.get("command"),
+            query=item.get("query"),
+            glob=item.get("glob"),
+            limit=item.get("limit"),
             event_type=item.get("event_type"),
             message=item.get("message"),
             blocking=item.get("blocking"),
@@ -107,6 +116,24 @@ def parse_action_plan(raw: str) -> ActionPlan:
         elif kind == "run":
             if not isinstance(action.command, str) or not action.command.strip():
                 raise ActionPlanError(f"actions[{idx}] run requires command")
+        elif kind == "list":
+            if action.path is not None and (not isinstance(action.path, str) or not action.path.strip()):
+                raise ActionPlanError(f"actions[{idx}] list path must be non-empty string")
+            if action.glob is not None and (not isinstance(action.glob, str) or not action.glob.strip()):
+                raise ActionPlanError(f"actions[{idx}] list glob must be non-empty string")
+            if action.limit is not None:
+                if not isinstance(action.limit, int) or action.limit < 1 or action.limit > 500:
+                    raise ActionPlanError(f"actions[{idx}] list limit must be integer in 1..500")
+        elif kind == "search":
+            if not isinstance(action.query, str) or not action.query.strip():
+                raise ActionPlanError(f"actions[{idx}] search requires query")
+            if action.path is not None and (not isinstance(action.path, str) or not action.path.strip()):
+                raise ActionPlanError(f"actions[{idx}] search path must be non-empty string")
+            if action.glob is not None and (not isinstance(action.glob, str) or not action.glob.strip()):
+                raise ActionPlanError(f"actions[{idx}] search glob must be non-empty string")
+            if action.limit is not None:
+                if not isinstance(action.limit, int) or action.limit < 1 or action.limit > 500:
+                    raise ActionPlanError(f"actions[{idx}] search limit must be integer in 1..500")
         elif kind == "emit":
             if action.event_type not in valid_event_types:
                 raise ActionPlanError(f"actions[{idx}] emit requires valid event_type")

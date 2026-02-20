@@ -20,8 +20,9 @@ _EVENT_STYLES: dict[str, tuple[str, str]] = {
 
 
 class ConsoleEventSink:
-    def __init__(self) -> None:
+    def __init__(self, verbose: int = 0) -> None:
         self.console = Console()
+        self.verbose = verbose
 
     def emit(self, event: Event) -> None:
         color, icon = _EVENT_STYLES.get(event.type, ("white", "•"))
@@ -29,8 +30,11 @@ class ConsoleEventSink:
         subtitle = "blocking" if event.blocking else "non-blocking"
 
         lines = [Text(event.one_line_summary, style="bold")]
-        if event.payload:
-            payload_str = json.dumps(event.payload, ensure_ascii=True, indent=2)
+        if event.payload and (self.verbose >= 1 or event.type in {"error", "review"}):
+            payload_obj = event.payload
+            payload_str = json.dumps(payload_obj, ensure_ascii=True, indent=2)
+            if self.verbose == 1 and len(payload_str) > 2200:
+                payload_str = payload_str[:2200] + "\n... (truncated; use -vv for full payload)"
             lines.append(Text(""))
             lines.append(Syntax(payload_str, "json", word_wrap=True))
 

@@ -28,10 +28,11 @@ from hexi.core.schemas import ActionPlanError, parse_action_plan
 from hexi.core.service import RunStepService
 
 app = typer.Typer(
-    help="Hexi CLI (v0.2.1): single-step coding-agent runtime.",
+    help="Hexi CLI (v0.3.0): single-step coding-agent runtime.",
     no_args_is_help=True,
 )
 console = Console()
+GLOBAL_VERBOSE = 0
 
 SUPPORTED_PROVIDERS = ["openrouter_http", "openrouter_sdk", "openai_compat", "anthropic_compat"]
 TEMPLATES = [
@@ -80,8 +81,22 @@ def app_callback(
         is_eager=True,
         callback=_version_callback,
     ),
+    verbose: int = typer.Option(
+        0,
+        "-v",
+        "--verbose",
+        count=True,
+        help="Increase output verbosity. Use -v or -vv.",
+    ),
 ) -> None:
     """Hexi command group callback."""
+    global GLOBAL_VERBOSE
+    GLOBAL_VERBOSE = verbose
+
+
+def _trace(message: str, level: int = 1) -> None:
+    if GLOBAL_VERBOSE >= level:
+        console.print(f"[dim][trace:v{level}] {message}[/dim]")
 
 
 def _workspace_and_memory() -> tuple[LocalGitWorkspace, FileMemory]:
@@ -361,7 +376,9 @@ def apply_cmd(
     except RuntimeError as exc:
         _error_and_exit(str(exc))
 
+    _trace(f"Workspace root: {ws.repo_root()}")
     memory.ensure_initialized()
+    _trace(f"Runlog path: {memory.runlog_path}", level=2)
     info = Table(show_header=False)
     info.add_row("Plan file", str(plan))
     info.add_row("Summary", parsed.summary)
@@ -373,7 +390,7 @@ def apply_cmd(
         model=None,
         workspace=ws,
         executor=LocalExec(),
-        events=ConsoleEventSink(),
+        events=ConsoleEventSink(verbose=GLOBAL_VERBOSE),
         memory=memory,
     )
     result = service.run_plan(task=task, plan=parsed, source=str(plan))
@@ -668,6 +685,8 @@ def run_cmd(task: str) -> None:
         _error_and_exit(str(exc))
     memory.ensure_initialized()
     config = memory.load_model_config()
+    _trace(f"Workspace root: {ws.repo_root()}")
+    _trace(f"Loaded provider={config.provider}, model={config.model}")
     memory.apply_api_key_to_env(config.provider)
     model = _pick_model(config.provider)
 
@@ -683,7 +702,7 @@ def run_cmd(task: str) -> None:
         model=model,
         workspace=ws,
         executor=LocalExec(),
-        events=ConsoleEventSink(),
+        events=ConsoleEventSink(verbose=GLOBAL_VERBOSE),
         memory=memory,
     )
     result = service.run_once(task)
