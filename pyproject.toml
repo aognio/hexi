@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "hexicodes"
-version = "0.2.0"
+version = "0.2.1"
 description = "Minimal contract-driven coding-agent runtime + CLI"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -92,17 +92,18 @@ testpaths = ["tests"]
 addopts = "-q"
 
 [tool.poe.tasks]
-test = "pytest -q"
+test = "PYTHONPATH=src pytest -q"
 docs = "mkdocs serve"
 docs-build = "mkdocs build -q"
-check = ["pytest -q", "mkdocs build -q"]
 clean = "rm -rf build dist *.egg-info src/hexicodes.egg-info site"
-build = ["python -m build", "python -m twine check dist/*"]
 publish-testpypi = "python -m twine upload --repository-url https://test.pypi.org/legacy/ dist/*"
 publish-pypi = "python -m twine upload dist/*"
-release = [
-  "python -m build",
-  "python -m twine check dist/*",
-  "pytest -q",
-  "mkdocs build -q"
-]
+
+[tool.poe.tasks.check]
+shell = "PYTHONPATH=src pytest -q && mkdocs build -q"
+
+[tool.poe.tasks.build]
+shell = "python -m build && python -m twine check dist/*"
+
+[tool.poe.tasks.release]
+shell = "python -m build && python -m twine check dist/* && PYTHONPATH=src pytest -q && mkdocs build -q"

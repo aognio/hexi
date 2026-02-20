@@ -28,7 +28,7 @@ from hexi.core.schemas import ActionPlanError, parse_action_plan
 from hexi.core.service import RunStepService
 
 app = typer.Typer(
-    help="Hexi CLI (v0.2.0): single-step coding-agent runtime.",
+    help="Hexi CLI (v0.2.1): single-step coding-agent runtime.",
     no_args_is_help=True,
 )
 console = Console()

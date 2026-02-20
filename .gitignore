@@ -6,3 +6,4 @@ site/
 dist/
 build/
 src/hexicodes.egg-info/
+scripts/release.sh

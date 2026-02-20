@@ -69,3 +69,32 @@ poe publish-pypi
 4. Publish:
    - `poe publish-testpypi` (optional but recommended)
    - `poe publish-pypi`
+
+## CI alignment
+
+Hexi CI runs:
+
+- `poe check` (tests + docs build)
+- package smoke checks:
+  - build wheel
+  - install built wheel
+  - verify packaged templates are available
+  - run `hexi new` from installed wheel
+
+This keeps local release workflow and CI validation aligned.
+
+## Common publish issues
+
+### Twine error: missing `testpypi` in `~/.pypirc`
+
+Use the explicit repository URL:
+
+```bash
+python -m twine upload --repository-url https://test.pypi.org/legacy/ dist/*
+```
+
+`poe publish-testpypi` already uses this form.
+
+### Upload rejected due to package-name similarity
+
+PyPI can reject names considered too similar to existing projects. Rename the distribution package (`[project].name`) and re-publish with a new version.

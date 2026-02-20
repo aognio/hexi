@@ -1,4 +1,4 @@
-# Hexi v0.2.0
+# Hexi v0.2.1
 
 ![Hexi Saturn Hexagon](https://raw.githubusercontent.com/aognio/hexi/main/assets/images/hexi-saturn-hexagon-1024x1024.png)
 
@@ -59,7 +59,7 @@ Re-run onboarding to update `.hexi/local.toml`.
 
 ## What it is not
 - No daemon, no background workers, no web UI
-- No MCP server and no SQLite in v0.2.0
+- No MCP server and no SQLite in v0.2.1
 - No multi-agent orchestration
 
 
@@ -128,6 +128,10 @@ mkdocs serve
 ```
 
 Read the Docs config is in `.readthedocs.yml`.
+
+CI runs on GitHub Actions and validates:
+- `poe check` (tests + docs build)
+- package smoke flow (build wheel, install wheel, verify templates, run `hexi new`)
 
 ## Configuration design choices
 Hexi uses layered TOML configuration:

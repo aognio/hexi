@@ -4,6 +4,17 @@ All notable changes to this project will be documented in this file.
 
 The format is based on Keep a Changelog, and this project follows Semantic Versioning.
 
+## [0.2.1] - 2026-02-20
+
+### Added
+- GitHub Actions CI workflow:
+  - matrix checks (`poe check`) on Python 3.10/3.11/3.12
+  - package smoke job that builds wheel, installs it, validates packaged templates, and runs `hexi new`
+
+### Changed
+- Version bumped from `0.2.0` to `0.2.1`.
+- Release automation docs expanded with CI notes and publish troubleshooting guidance.
+
 ## [0.2.0] - 2026-02-19
 
 ### Added
@@ -61,5 +72,6 @@ The format is based on Keep a Changelog, and this project follows Semantic Versi
 - Reduced false failures in idea parsing with tolerant JSON extraction from model output.
 - Resolved dependency compatibility issue by allowing `rich>=13.7,<15`.
 
+[0.2.1]: https://github.com/hexi-codes/hexi/releases/tag/v0.2.1
 [0.2.0]: https://github.com/hexi-codes/hexi/releases/tag/v0.2.0
 [0.1.0]: https://github.com/hexi-codes/hexi/releases/tag/v0.1.0
